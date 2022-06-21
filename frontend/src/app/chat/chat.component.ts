@@ -46,6 +46,8 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.channelUUID = environment.CHAT_ROOM;
+    this.getMessages();
+    setInterval(() => this.getMessages(), 2000);
   }
   public messages: ChatMessage[] = [];
   public senderUUID = '';
