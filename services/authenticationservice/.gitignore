@@ -1,4 +1,7 @@
 # Logs
+node_modules
+dist
+/dist
 logs
 *.log
 npm-debug.log*
@@ -62,6 +65,3 @@ typings/
 
 # Cache used by TypeScript's incremental build
 *.tsbuildinfo
-/node_modules
-dist
-/dist
