@@ -46,8 +46,7 @@ export class ChatComponent implements OnInit {
 
   ngOnInit(): void {
     this.channelUUID = environment.CHAT_ROOM;
-    this.getMessages();
-    setInterval(() => this.getMessages(), 2000);
+
   }
   public messages: ChatMessage[] = [];
   public senderUUID = '';
@@ -102,12 +101,18 @@ export class ChatComponent implements OnInit {
     this.inRoom = false;
     localStorage.removeItem('token');
   }
+  getSenderId(token: string) {
+    this.userHttpService.getSender(this.token).subscribe(res => {
+      let userName = Object.values(res)
+      this.senderUUID = userName[5];
 
-
+    })
+  }
 
   getMessages() {
     const authHeader = new HttpHeaders({ Authorization: `Bearer ${this.token}` });
     this.inRoom = true;
+    this.getSenderId(this.token);
     this.userHttpService.get(this.token, this.channelUUID).subscribe(data => {
       this.messages = [];
       for (const d of data) {
@@ -134,6 +139,24 @@ export class ChatComponent implements OnInit {
       channels: [this.channelUUID],
       triggerEvents: ['message'],
     });
+    this.pubnub.addListener({
+      message: (msg: any) => {
+        const receivedMessage: ChatMessage = {
+          body: msg.message.description,
+          subject: msg.message.title,
+          reply: false,
+          sender: 'sender',
+        };
+        if (msg.message.title !== this.senderUUID) {
+          this.messages.push(receivedMessage);
+          this.ngxNotificationService.sendMessage(
+            `New message from sender: ${msg.message.description}`,
+            'info',
+            'top-left',
+          );
+        }
+      }
+    })
 
     this.pubnub.getMessage(this.channelUUID, msg => {
       const receivedMessage: ChatMessage = {

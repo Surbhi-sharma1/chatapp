@@ -5,7 +5,7 @@ import { environment } from '../environments/environment';
 
 const baseUrl = `${environment.BASE_URL}/messages`;
 const tenantIdUrl = `${environment.BASE_URL}/userTenantId`;
-
+const URL = `http://localhost:3001/auth/me`;
 @Injectable()
 export class UserService {
   constructor(private readonly http: HttpClient) { }
@@ -36,6 +36,9 @@ export class UserService {
       responseType: 'text',
     });
   }
-
+  getSender(token: string) {
+    const authHeader = new HttpHeaders({ Authorization: `Bearer ${token}` });
+    return this.http.get(`${URL}`, { headers: authHeader });
+  }
 
 }
